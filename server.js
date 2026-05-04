@@ -8,8 +8,6 @@ dotenv.config();
 
 const app = express();
 
-connectDB();
-
 app.use(cors());
 app.use(express.json());
 
@@ -20,7 +18,19 @@ app.get("/", (req, res) => res.send("API Running..."));
 
 app.use(errorHandler);
 
-// ❌ REMOVE THIS
-// app.listen(5000, () => console.log("Server running on port 5000"));
+// 🔥 IMPORTANT: wait for DB before starting server (local)
+const startServer = async () => {
+  try {
+    await connectDB(); // <-- wait here
+    app.listen(5000, () => console.log("Server running on port 5000"));
+  } catch (err) {
+    console.error("Server start error:", err);
+  }
+};
 
-module.exports = app; // ✅ ADD THIS
+// Only run locally (not on Vercel)
+if (process.env.NODE_ENV !== "production") {
+  startServer();
+}
+
+module.exports = app; // for Vercel
